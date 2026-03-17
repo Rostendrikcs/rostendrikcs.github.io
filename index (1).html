@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terrus — Developer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f5f0;
+      --ink: #1a1814;
+      --muted: #888078;
+      --accent: #2d6a4f;
+      --accent2: #e76f51;
+      --card: #ffffff;
+      --border: #e2ddd5;
+      --tag-bg: #eef4f0;
+      --tag-ink: #2d6a4f;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 80px 0 60px;
+      position: relative;
+    }
+
+    .header-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    .name {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(52px, 10vw, 88px);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      opacity: 0;
+      animation: fadeUp 0.6s 0.1s ease forwards;
+    }
+
+    .name span {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .tagline {
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 420px;
+      line-height: 1.7;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.2s ease forwards;
+    }
+
+    /* Декоративная линия */
+    .divider {
+      width: 40px;
+      height: 2px;
+      background: var(--accent2);
+      margin: 32px 0;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.3s ease forwards;
+    }
+
+    /* ── Section ── */
+    section {
+      margin-bottom: 64px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards;
+    }
+
+    section:nth-child(1) { animation-delay: 0.35s; }
+    section:nth-child(2) { animation-delay: 0.45s; }
+    section:nth-child(3) { animation-delay: 0.55s; }
+    section:nth-child(4) { animation-delay: 0.65s; }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── About card ── */
+    .about-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .about-card p {
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--ink);
+    }
+
+    .about-card .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      color: var(--accent);
+      margin-top: 16px;
+      background: var(--tag-bg);
+      padding: 5px 12px;
+      border-radius: 100px;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease infinite;
+    }
+
+    /* ── Skills grid ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .skill-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      cursor: default;
+    }
+
+    .skill-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+      border-color: var(--accent);
+    }
+
+    .skill-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .skill-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .skill-level {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Projects ── */
+    .project-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: default;
+    }
+
+    .project-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .project-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .project-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .project-tag {
+      font-size: 10px;
+      background: var(--tag-bg);
+      color: var(--tag-ink);
+      padding: 4px 10px;
+      border-radius: 100px;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    /* ── Contacts ── */
+    .contacts-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contact-row {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--ink);
+      font-size: 13px;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .contact-row:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .contact-icon { font-size: 18px; }
+
+    .contact-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 32px 0 48px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 16px;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      header { padding: 56px 0 40px; }
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .project-card { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <span class="label">Portfolio / Резюме</span>
+      <h1 class="name">Terr<span>us</span></h1>
+      <p class="tagline">Начинающий разработчик. Пишу на Python, C++ и HTML, исследую возможности искусственного интеллекта.</p>
+      <div class="divider"></div>
+    </div>
+  </header>
+
+  <!-- О СЕБЕ -->
+  <section>
+    <div class="section-label">О себе</div>
+    <div class="about-card">
+      <p>Привет! Меня зовут <strong>Terrus</strong> — я начинающий программист, увлечённый разработкой и технологиями ИИ. Активно изучаю Python и C++, строю первые проекты и не боюсь браться за сложные задачи.</p>
+      <div class="status">
+        <div class="dot"></div>
+        Открыт к сотрудничеству
+      </div>
+    </div>
+  </section>
+
+  <!-- НАВЫКИ -->
+  <section>
+    <div class="section-label">Навыки</div>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">🐍</div>
+        <div>
+          <div class="skill-name">Python</div>
+          <div class="skill-level">Основной язык</div>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚙️</div>
+        <div>
+          <div class="skill-name">C++</div>
+          <div class="skill-level">В изучении</div>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🌐</div>
+        <div>
+          <div class="skill-name">HTML</div>
+          <div class="skill-level">Вёрстка страниц</div>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🤖</div>
+        <div>
+          <div class="skill-name">Работа с ИИ</div>
+          <div class="skill-level">Промптинг, интеграция</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПРОЕКТЫ -->
+  <section>
+    <div class="section-label">Проекты</div>
+    <div class="project-card">
+      <div>
+        <div class="project-title">NotesApp</div>
+        <div class="project-desc">Android-приложение для заметок с поиском, цветными карточками и локальной базой данных Room.</div>
+      </div>
+      <span class="project-tag">Kotlin</span>
+    </div>
+    <div class="project-card">
+      <div>
+        <div class="project-title">VPN App</div>
+        <div class="project-desc">Прототип VPN-клиента для Android с использованием стандартного VpnService API.</div>
+      </div>
+      <span class="project-tag">Android</span>
+    </div>
+    <div class="project-card">
+      <div>
+        <div class="project-title">Этот сайт</div>
+        <div class="project-desc">Сайт-резюме написан на чистом HTML/CSS без фреймворков.</div>
+      </div>
+      <span class="project-tag">HTML / CSS</span>
+    </div>
+  </section>
+
+  <!-- КОНТАКТЫ -->
+  <section>
+    <div class="section-label">Контакты</div>
+    <div class="contacts-grid">
+      <a class="contact-row" href="mailto:vld07052008@yandex.ru">
+        <span class="contact-icon">✉️</span>
+        vld07052008@yandex.ru
+        <span class="contact-label">Email</span>
+      </a>
+      <a class="contact-row" href="https://t.me/Okesliladno" target="_blank">
+        <span class="contact-icon">✈️</span>
+        @Okesliladno
+        <span class="contact-label">Telegram</span>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 Terrus — сделано с ☕ и строчками кода
+  </footer>
+
+</div>
+
+</body>
+</html>
