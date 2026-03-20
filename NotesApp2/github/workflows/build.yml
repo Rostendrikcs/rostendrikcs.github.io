@@ -1,0 +1,60 @@
+# .github/workflows/build.yml
+#
+# Этот файл — инструкция для GitHub Actions.
+# Каждый раз когда ты делаешь push в репозиторий,
+# GitHub запускает виртуальную машину и выполняет эти шаги.
+# В итоге собирается APK, который ты можешь скачать.
+
+name: Build Debug APK  # название workflow (видно в интерфейсе GitHub)
+
+on:
+  push:
+    branches: [ "main" ]   # запускать при каждом push в ветку main
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:        # также можно запустить вручную кнопкой на GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # используем последний Ubuntu (бесплатно для публичных репо)
+
+    steps:
+      # 1. Скачиваем код из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Java 17 (нужна для сборки Android)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'  # популярный дистрибутив OpenJDK
+
+      # 3. Кешируем Gradle — чтобы не скачивать зависимости каждый раз
+      #    Первая сборка ~5 минут, последующие ~1-2 минуты
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 4. Даём права на запуск gradlew (на Linux нужно явно)
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 5. Собираем Debug APK
+      #    assembleDebug — стандартная Gradle-задача для debug сборки
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      # 6. Загружаем APK как артефакт — его можно будет скачать на странице Actions
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NotesApp-debug      # имя архива для скачивания
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30        # хранить 30 дней
